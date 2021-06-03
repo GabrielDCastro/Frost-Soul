@@ -3,7 +3,8 @@ clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()  # initiates pygame
-pygame.display.set_caption('Pygame Platformer')
+pygame.mixer.set_num_channels(64)
+pygame.display.set_caption('Frost Soul')
 WINDOW_SIZE = (900, 600)
 screen = pygame.display.set_mode(WINDOW_SIZE, 0, 32)  # initiate the window
 display = pygame.Surface((600, 300))  # used as the surface for rendering, which is scaled
@@ -113,6 +114,9 @@ def move(rect, movement, tiles):
 while True:  # game loop
     display.fill((194, 226, 255))  # coloca cor de fundo de azul quase branco
 
+    if snow_sound_timer > 0:
+        snow_sound_timer -= 1
+
     true_scroll[0] += (player_rect.x - true_scroll[0] - 169) / 20 #posição da camera x
     true_scroll[1] += (player_rect.y - true_scroll[1] - 112) / 20 #posição da camera y
     scroll = true_scroll.copy()
@@ -171,6 +175,12 @@ while True:  # game loop
     if collisions['bottom'] == True:
         air_timer = 0
         vertical_momentum = 0
+        if player_movement[0] !=0:
+            if snow_sound_timer ==0:
+                snow_sound_timer = 30
+                correr_neve.play()
+        if player_movement[0] ==0 or air_timer!=0:
+            correr_neve.fadeout(0)
     else:
         air_timer += 1
 
@@ -198,6 +208,7 @@ while True:  # game loop
             if event.key == K_a:
                 moving_left = True
             if event.key == K_w:
+                correr_neve.fadeout(0)
                 if air_timer < 7:
                     jump_sound.play()
                     vertical_momentum = -6
