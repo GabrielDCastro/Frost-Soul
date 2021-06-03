@@ -52,6 +52,8 @@ def change_action(action_var, frame, new_value):
 animation_database = {}
 animation_database['correr'] = load_animation('player_animations/correr', [7,7,7])
 animation_database['parado'] = load_animation('player_animations/parado', [7,7,7])
+animation_database['pular'] = load_animation('player_animations/pular', [7])
+animation_database['cair'] = load_animation('player_animations/cair', [7])
 
 player_action = 'parado'
 player_frame = 0
@@ -150,6 +152,11 @@ while True:  # game loop
     if player_movement[0] < 0:
         player_action, player_frame = change_action(player_action, player_frame, 'correr')
         player_flip = True
+    if vertical_momentum == 3:
+        player_action, player_frame = change_action(player_action, player_frame, 'cair')
+    elif air_timer > 7:
+        player_action, player_frame = change_action(player_action, player_frame, 'pular')
+
     player_rect, collisions = move(player_rect, player_movement, tile_rects)
 
     if collisions['bottom'] == True:
