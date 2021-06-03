@@ -1,6 +1,7 @@
 import pygame, sys
 clock = pygame.time.Clock()
 from pygame.locals import *
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()  # initiates pygame
 pygame.display.set_caption('Pygame Platformer')
 WINDOW_SIZE = (900, 600)
@@ -59,10 +60,18 @@ player_action = 'parado'
 player_frame = 0
 player_flip = False
 
+snow_sound_timer = 0
+
 game_map = load_map('map')
 
 grass_img = pygame.image.load('chao_neve.png')
 dirt_img = pygame.image.load('chao_terra.png')
+
+correr_neve = pygame.mixer.Sound('running_snow.wav')
+jump_sound = pygame.mixer.Sound('hop.wav')
+pygame.mixer.music.load('I_Stand_Alone.wav')
+pygame.mixer.music.play(-1)
+music = True
 
 player_rect = pygame.Rect(100, 100, 39, 45)
 
@@ -116,9 +125,9 @@ while True:  # game loop
                                background_object[1][1] - scroll[1] * background_object[0], background_object[1][2],
                                background_object[1][3])
         if background_object[0] == 1:
-            pygame.draw.rect(display, (61, 201, 255), obj_rect)
+            pygame.draw.rect(display, (95, 161, 254), obj_rect)
         else:
-            pygame.draw.rect(display, (234, 255, 255), obj_rect)
+            pygame.draw.rect(display, (95, 161, 254), obj_rect)
 
     tile_rects = []
     y = 0
@@ -177,17 +186,25 @@ while True:  # game loop
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:
-            if event.key == K_RIGHT:
+            if event.key == K_m:
+                if music == True:
+                    pygame.mixer.music.fadeout(10)
+                    music = False
+                else:
+                    pygame.mixer.music.play(-1)
+                    music = True
+            if event.key == K_d:
                 moving_right = True
-            if event.key == K_LEFT:
+            if event.key == K_a:
                 moving_left = True
-            if event.key == K_UP:
+            if event.key == K_w:
                 if air_timer < 7:
+                    jump_sound.play()
                     vertical_momentum = -6
         if event.type == KEYUP:
-            if event.key == K_RIGHT:
+            if event.key == K_d:
                 moving_right = False
-            if event.key == K_LEFT:
+            if event.key == K_a:
                 moving_left = False
 
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
