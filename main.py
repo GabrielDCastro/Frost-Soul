@@ -67,10 +67,14 @@ game_map = load_map('map')
 
 grass_img = pygame.image.load('chao_neve.png')
 dirt_img = pygame.image.load('chao_terra.png')
+crystal_img = pygame.image.load('Crystal.png')
 
 correr_neve = pygame.mixer.Sound('running_snow.wav')
 jump_sound = pygame.mixer.Sound('hop.wav')
+blizard_sound = pygame.mixer.Sound('blizzard.wav')
+blizard_sound.play(-1)
 pygame.mixer.music.load('I_Stand_Alone.wav')
+pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(-1)
 music = True
 
@@ -142,6 +146,8 @@ while True:  # game loop
                 display.blit(dirt_img, (x * 32 - scroll[0], y * 32 - scroll[1]))
             if tile == '2':
                 display.blit(grass_img, (x * 32 - scroll[0], y * 32 - scroll[1]))
+            if tile == '3':
+                display.blit(crystal_img, (x * 32 - scroll[0], y * 35 - scroll[1]))
             if tile != '0':
                 tile_rects.append(pygame.Rect(x * 32, y * 32, 32, 32))
             x += 1
