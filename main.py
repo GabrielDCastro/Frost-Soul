@@ -1,4 +1,5 @@
 import pygame, sys
+import data.engine as e
 clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -26,93 +27,29 @@ def load_map(path):
         game_map.append(list(row))
     return game_map
 
-global animation_frames
-animation_frames = {}
-
-def load_animation(path, frame_durations):
-    global animation_frames
-    animation_name = path.split('/')[-1]
-    animation_frame_data = []
-    n = 0
-    for frame in frame_durations:
-        animation_frame_id = animation_name + '_' + str(n)
-        img_location = path + '/' + animation_frame_id + '.png'
-        animation_image = pygame.image.load(img_location).convert()
-        animation_image.set_colorkey((0,0,0)) #o fundo do personagem está preto, isso tira a cor preta de fundo
-        animation_frames[animation_frame_id] = animation_image.copy()
-        for i in range(frame):
-            animation_frame_data.append(animation_frame_id)
-        n += 1
-    return animation_frame_data
-
-def change_action(action_var, frame, new_value):
-    if action_var != new_value:
-        action_var = new_value
-        frame = 0
-    return action_var, frame
-
-animation_database = {}
-animation_database['correr'] = load_animation('player_animations/correr', [7,7,7])
-animation_database['parado'] = load_animation('player_animations/parado', [7,7,7])
-animation_database['pular'] = load_animation('player_animations/pular', [7])
-animation_database['cair'] = load_animation('player_animations/cair', [7])
-
-player_action = 'parado'
-player_frame = 0
-player_flip = False
+e.load_animations('data/images/entities/')
 
 snow_sound_timer = 0
 
 game_map = load_map('map')
 
-grass_img = pygame.image.load('chao_neve.png')
-dirt_img = pygame.image.load('chao_terra.png')
-crystal_img = pygame.image.load('Crystal.png')
+grass_img = pygame.image.load('data/images/chao_neve.png')
+dirt_img = pygame.image.load('data/images/chao_terra.png')
+crystal_img = pygame.image.load('data/images/Crystal.png')
 
-correr_neve = pygame.mixer.Sound('running_snow.wav')
-jump_sound = pygame.mixer.Sound('hop.wav')
-blizard_sound = pygame.mixer.Sound('blizzard.wav')
+correr_neve = pygame.mixer.Sound('data/audios/running_snow.wav')
+jump_sound = pygame.mixer.Sound('data/audios/hop.wav')
+blizard_sound = pygame.mixer.Sound('data/audios/blizzard.wav')
 blizard_sound.play(-1)
-pygame.mixer.music.load('I_Stand_Alone.wav')
+pygame.mixer.music.load('data/audios/I_Stand_Alone.wav')
 pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(-1)
 music = True
 
-player_rect = pygame.Rect(100, 100, 39, 45)
+player = e.entity(100, 100, 39, 45, 'player')
 
 background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0.5, [30, 40, 40, 400]],
                       [0.5, [130, 90, 100, 400]], [0.5, [300, 80, 120, 400]]]
-
-
-def collision_test(rect, tiles):
-    hit_list = []
-    for tile in tiles:
-        if rect.colliderect(tile):
-            hit_list.append(tile)
-    return hit_list
-
-
-def move(rect, movement, tiles):
-    collision_types = {'top': False, 'bottom': False, 'right': False, 'left': False}
-    rect.x += movement[0]
-    hit_list = collision_test(rect, tiles)
-    for tile in hit_list:
-        if movement[0] > 0:
-            rect.right = tile.left
-            collision_types['right'] = True
-        elif movement[0] < 0:
-            rect.left = tile.right
-            collision_types['left'] = True
-    rect.y += movement[1]
-    hit_list = collision_test(rect, tiles)
-    for tile in hit_list:
-        if movement[1] > 0:
-            rect.bottom = tile.top
-            collision_types['bottom'] = True
-        elif movement[1] < 0:
-            rect.top = tile.bottom
-            collision_types['top'] = True
-    return rect, collision_types
 
 
 while True:  # game loop
@@ -121,8 +58,8 @@ while True:  # game loop
     if snow_sound_timer > 0:
         snow_sound_timer -= 1
 
-    true_scroll[0] += (player_rect.x - true_scroll[0] - 169) / 20 #posição da camera x
-    true_scroll[1] += (player_rect.y - true_scroll[1] - 112) / 20 #posição da camera y
+    true_scroll[0] += (player.x - true_scroll[0] - 169) / 20 #posição da camera x
+    true_scroll[1] += (player.y - true_scroll[1] - 112) / 20 #posição da camera y
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
@@ -163,22 +100,22 @@ while True:  # game loop
     if vertical_momentum > 3:
         vertical_momentum = 3
 
-    if player_movement[0] > 0:
-        player_action, player_frame = change_action(player_action, player_frame, 'correr')
-        player_flip = False
     if player_movement[0] == 0:
-        player_action, player_frame = change_action(player_action, player_frame, 'parado')
+        player.set_action('parado')
+    if player_movement[0] > 0:
+        player.set_action('correr')
+        player.set_flip(False)
     if player_movement[0] < 0:
-        player_action, player_frame = change_action(player_action, player_frame, 'correr')
-        player_flip = True
+        player.set_action('correr')
+        player.set_flip(True)
     if vertical_momentum == 3:
-        player_action, player_frame = change_action(player_action, player_frame, 'cair')
+        player.set_action('cair')
     elif air_timer > 7:
-        player_action, player_frame = change_action(player_action, player_frame, 'pular')
+        player.set_action('pular')
 
-    player_rect, collisions = move(player_rect, player_movement, tile_rects)
+    collision_types = player.move(player_movement, tile_rects)
 
-    if collisions['bottom'] == True:
+    if collision_types['bottom'] == True:
         air_timer = 0
         vertical_momentum = 0
         if player_movement[0] !=0:
@@ -190,12 +127,8 @@ while True:  # game loop
     else:
         air_timer += 1
 
-    player_frame += 1
-    if player_frame >= len(animation_database[player_action]):
-        player_frame = 0
-    player_img_id = animation_database[player_action][player_frame]
-    player_img = animation_frames[player_img_id]
-    display.blit(pygame.transform.flip(player_img,player_flip, False,),(player_rect.x - scroll[0], player_rect.y - scroll[1]))
+    player.change_frame(1)
+    player.display(display, scroll)
 
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
@@ -215,9 +148,9 @@ while True:  # game loop
                 moving_left = True
             if event.key == K_w:
                 correr_neve.fadeout(0)
-                if air_timer < 7:
+                if air_timer < 8:
                     jump_sound.play()
-                    vertical_momentum = -6
+                    vertical_momentum = -7
         if event.type == KEYUP:
             if event.key == K_d:
                 moving_right = False
