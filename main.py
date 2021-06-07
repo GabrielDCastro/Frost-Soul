@@ -1,6 +1,6 @@
-import random
 import pygame, sys
 import data.engine as e
+import threading
 clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -53,6 +53,7 @@ enemies_map_location_x= [200, 300]
 enemies = []
 for i in range(2):
     enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto')]) #gera a localização do inimgo
+esqueleto1 = [0, e.entity(200, 200, 45, 50, 'esqueleto')]
     # e coloca a física de colisão
 
 background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0.5, [30, 40, 40, 400]],
@@ -144,22 +145,22 @@ while True:  # game loop
         enemy_movement = [0, enemy[0]]
         if player.x > enemy[1].x + 5:
             enemy_movement[0] = 1
+            enemy[1].set_action('correr')
+            enemy[1].set_flip(False)
         if player.x < enemy[1].x - 5:
             enemy_movement[0] = -1
+            enemy[1].set_action('correr')
+            enemy[1].set_flip(True)
+        if enemy_movement[0] == 0:
+            enemy[1].set_action('parado')
         collision_types = enemy[1].move(enemy_movement, tile_rects)
         if collision_types['bottom'] == True:
             enemy[0] = 0
         enemy[1].display(display, scroll)
         if player.obj.rect.colliderect(enemy[1].obj.rect):
-            vertical_momentum = -4
-        if enemy_movement[0] == 0:
-            enemy[1].set_action('parado')
-        if enemy_movement[0] > 0:
-            enemy[1].set_action('correr')
-            enemy[1].set_flip(False)
-        if enemy_movement[0] < 0:
-            enemy[1].set_action('correr')
-            enemy[1].set_flip(True)
+            player_movement[0] += 4
+            #vertical_momentum = -4
+        enemy[1].change_frame(1)
 
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
