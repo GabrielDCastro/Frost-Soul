@@ -1,6 +1,7 @@
 import pygame, sys
 import data.engine as e
 import threading
+import time
 clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -49,9 +50,9 @@ music = True
 
 player = e.entity(100, 100, 39, 45, 'player')
 
-enemies_map_location_x= [200, 300]
+enemies_map_location_x= [200]
 enemies = []
-for i in range(2):
+for i in range(1):
     enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto')]) #gera a localização do inimgo
 esqueleto1 = [0, e.entity(200, 200, 45, 50, 'esqueleto')]
     # e coloca a física de colisão
@@ -59,6 +60,17 @@ esqueleto1 = [0, e.entity(200, 200, 45, 50, 'esqueleto')]
 background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0.5, [30, 40, 40, 400]],
                       [0.5, [130, 90, 100, 400]], [0.5, [300, 80, 120, 400]]]
 
+def hit_by_right_side(): #faz o personagem ir para esquerda
+    global moving_left
+    moving_left = True
+    time.sleep(0.1)
+    moving_left = False
+
+def hit_by_left_side(): #faz o personagem ir para direira
+    global moving_right
+    moving_right = True
+    time.sleep(0.1)
+    moving_right = False
 
 while True:  # game loop
     display.fill((194, 226, 255))  # coloca cor de fundo de azul quase branco
@@ -143,11 +155,11 @@ while True:  # game loop
         if enemy[0] > 3:
             enemy[0] = 3
         enemy_movement = [0, enemy[0]]
-        if player.x > enemy[1].x + 5:
+        if player.x > enemy[1].x + 50:
             enemy_movement[0] = 1
             enemy[1].set_action('correr')
             enemy[1].set_flip(False)
-        if player.x < enemy[1].x - 5:
+        if player.x < enemy[1].x - 50:
             enemy_movement[0] = -1
             enemy[1].set_action('correr')
             enemy[1].set_flip(True)
@@ -158,7 +170,11 @@ while True:  # game loop
             enemy[0] = 0
         enemy[1].display(display, scroll)
         if player.obj.rect.colliderect(enemy[1].obj.rect):
-            player_movement[0] += 4
+            if player.x < enemy[1].x:
+                threading.Thread(target=hit_by_right_side).start()
+            if player.x > enemy[1].x:
+                threading.Thread(target=hit_by_left_side).start()
+                enemy_movement[0] = 0
             #vertical_momentum = -4
         enemy[1].change_frame(1)
 
