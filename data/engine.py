@@ -174,6 +174,9 @@ class entity(object):
             self.set_animation_tags(anim[1])
             self.animation_frame = 0
 
+    def atack(self):
+        pass
+
     def get_entity_angle(entity_2):
         x1 = self.x + int(self.size_x / 2)
         y1 = self.y + int(self.size_y / 2)

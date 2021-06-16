@@ -2,5 +2,6 @@ player/parado/ 7;7;7 loop
 player/correr/ 7;7;7 loop
 player/pular/ 7 loop
 player/cair/ 7 loop
+player/atacando/ 9;9;9;9;9 loop
 esqueleto/parado/ 7;7;7;7 loop
 esqueleto/correr/ 7;7;7;7 loop

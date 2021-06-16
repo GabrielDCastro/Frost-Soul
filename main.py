@@ -1,7 +1,7 @@
 import pygame, sys
 import data.engine as e
 import threading
-import time
+from pygame.locals import *
 clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -14,6 +14,7 @@ display = pygame.Surface((600, 300))  # used as the surface for rendering, which
 
 moving_right = False
 moving_left = False
+right_click = False
 vertical_momentum = 0
 air_timer = 0
 
@@ -30,6 +31,9 @@ def load_map(path):
     return game_map
 
 e.load_animations('data/images/entities/')
+atack1 = pygame.image.load('ddata/images/entities/player/atacando/atacando_0.png')
+atack2 = pygame.image.load('ddata/images/entities/player/atacando/atacando_1.png')
+atack_count = 0
 
 snow_sound_timer = 0
 
@@ -61,16 +65,14 @@ background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0
                       [0.5, [130, 90, 100, 400]], [0.5, [300, 80, 120, 400]]]
 
 def hit_by_right_side(): #faz o personagem ir para esquerda
-    global moving_left
-    moving_left = True
-    time.sleep(0.1)
-    moving_left = False
+    global moving_right
+    moving_right = False
 
 def hit_by_left_side(): #faz o personagem ir para direira
-    global moving_right
-    moving_right = True
-    time.sleep(0.1)
-    moving_right = False
+    global moving_left
+    moving_left = False
+
+offset = [0,0]
 
 while True:  # game loop
     display.fill((194, 226, 255))  # coloca cor de fundo de azul quase branco
@@ -112,8 +114,10 @@ while True:  # game loop
 
     player_movement = [0, 0]
     if moving_right == True:
+        right_click = False
         player_movement[0] += 4
     if moving_left == True:
+        right_click = False
         player_movement[0] -= 4
     player_movement[1] += vertical_momentum
     vertical_momentum += 0.2
@@ -132,6 +136,11 @@ while True:  # game loop
         player.set_action('cair')
     elif air_timer > 7:
         player.set_action('pular')
+
+    if right_click == True:
+        moving_right = False
+        moving_left = False
+        player.set_action('atacando')
 
     collision_types = player.move(player_movement, tile_rects)
 
@@ -197,6 +206,7 @@ while True:  # game loop
             if event.key == K_w:
                 correr_neve.fadeout(0)
                 if air_timer < 8:
+                    right_click = False
                     jump_sound.play()
                     vertical_momentum = -7
         if event.type == KEYUP:
@@ -204,6 +214,12 @@ while True:  # game loop
                 moving_right = False
             if event.key == K_a:
                 moving_left = False
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                right_click = True
+        elif event.type == MOUSEBUTTONUP:
+            if event.button == 1:
+                right_click = False
 
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
     pygame.display.update()
