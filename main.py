@@ -31,8 +31,9 @@ def load_map(path):
     return game_map
 
 e.load_animations('data/images/entities/')
-atack1 = pygame.image.load('ddata/images/entities/player/atacando/atacando_0.png')
-atack2 = pygame.image.load('ddata/images/entities/player/atacando/atacando_1.png')
+atack_list = []
+atack_list.append(pygame.image.load('data/images/entities/player/atacando/atacando_0.png'))
+atack_list.append(pygame.image.load('data/images/entities/player/atacando/atacando_1.png'))
 atack_count = 0
 
 snow_sound_timer = 0
@@ -124,17 +125,17 @@ while True:  # game loop
     if vertical_momentum > 3:
         vertical_momentum = 3
 
-    if player_movement[0] == 0:
+    if player_movement[0] == 0 and right_click == False:
         player.set_action('parado')
-    if player_movement[0] > 0:
+    if player_movement[0] > 0 and right_click == False:
         player.set_action('correr')
         player.set_flip(False)
-    if player_movement[0] < 0:
+    if player_movement[0] < 0 and right_click == False:
         player.set_action('correr')
         player.set_flip(True)
-    if vertical_momentum == 3:
+    if vertical_momentum == 3 and right_click == False:
         player.set_action('cair')
-    elif air_timer > 7:
+    elif air_timer > 7 and right_click == False:
         player.set_action('pular')
 
     if right_click == True:
