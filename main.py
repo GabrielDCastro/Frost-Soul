@@ -1,7 +1,7 @@
 import pygame, sys
 import data.engine as e
 import threading
-from pygame.locals import *
+import time
 clock = pygame.time.Clock()
 from pygame.locals import *
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -55,9 +55,9 @@ music = True
 
 player = e.entity(100, 100, 39, 45, 'player')
 
-enemies_map_location_x= [200]
+enemies_map_location_x= [200,350]
 enemies = []
-for i in range(1):
+for i in range(2):
     enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto')]) #gera a localização do inimgo
 esqueleto1 = [0, e.entity(200, 200, 45, 50, 'esqueleto')]
     # e coloca a física de colisão
@@ -72,6 +72,17 @@ def hit_by_right_side(): #faz o personagem ir para esquerda
 def hit_by_left_side(): #faz o personagem ir para direira
     global moving_left
     moving_left = False
+
+def atack():
+    if player.flip == False:
+        if moving_right == False:
+            player_movement[0] += 2
+    if player.flip == True:
+        if moving_left == False:
+            player_movement[0] -= 2
+    time.sleep(0.2)
+    global right_click
+    right_click = False
 
 offset = [0,0]
 
@@ -115,10 +126,8 @@ while True:  # game loop
 
     player_movement = [0, 0]
     if moving_right == True:
-        right_click = False
         player_movement[0] += 4
     if moving_left == True:
-        right_click = False
         player_movement[0] -= 4
     player_movement[1] += vertical_momentum
     vertical_momentum += 0.2
@@ -127,11 +136,17 @@ while True:  # game loop
 
     if player_movement[0] == 0 and right_click == False:
         player.set_action('parado')
-    if player_movement[0] > 0 and right_click == False:
-        player.set_action('correr')
+    if player_movement[0] > 0:
+        if right_click == True:
+            player.set_action('atacando')
+        else:
+            player.set_action('correr')
         player.set_flip(False)
-    if player_movement[0] < 0 and right_click == False:
-        player.set_action('correr')
+    if player_movement[0] < 0 :
+        if right_click == True:
+            player.set_action('atacando')
+        else:
+            player.set_action('correr')
         player.set_flip(True)
     if vertical_momentum == 3 and right_click == False:
         player.set_action('cair')
@@ -139,9 +154,9 @@ while True:  # game loop
         player.set_action('pular')
 
     if right_click == True:
-        moving_right = False
-        moving_left = False
         player.set_action('atacando')
+        threading.Thread(target=atack).start()
+
 
     collision_types = player.move(player_movement, tile_rects)
 
@@ -182,8 +197,13 @@ while True:  # game loop
         if player.obj.rect.colliderect(enemy[1].obj.rect):
             if player.x < enemy[1].x:
                 threading.Thread(target=hit_by_right_side).start()
+                if right_click == True:
+                    enemies.remove(enemy)
+                    enemy_movement[0] = 0
             if player.x > enemy[1].x:
                 threading.Thread(target=hit_by_left_side).start()
+                if right_click == True:
+                    enemies.remove(enemy)
                 enemy_movement[0] = 0
             #vertical_momentum = -4
         enemy[1].change_frame(1)
@@ -218,9 +238,7 @@ while True:  # game loop
         if event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
                 right_click = True
-        elif event.type == MOUSEBUTTONUP:
-            if event.button == 1:
-                right_click = False
+
 
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
     pygame.display.update()
