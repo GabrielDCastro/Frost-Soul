@@ -17,7 +17,6 @@ moving_left = False
 right_click = False
 vertical_momentum = 0
 air_timer = 0
-
 true_scroll = [0, 0]
 
 def load_map(path):
@@ -29,6 +28,7 @@ def load_map(path):
     for row in data:
         game_map.append(list(row))
     return game_map
+
 
 e.load_animations('data/images/entities/')
 atack_list = []
