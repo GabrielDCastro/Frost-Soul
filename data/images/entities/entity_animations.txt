@@ -5,3 +5,4 @@ player/cair/ 7 loop
 player/atacando/ 5;5;5;5;5 
 esqueleto/parado/ 7;7;7;7 loop
 esqueleto/correr/ 7;7;7;7 loop
+golem/parado/ 7;7;7;7 loop

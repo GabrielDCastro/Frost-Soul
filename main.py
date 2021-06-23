@@ -59,8 +59,12 @@ enemies_map_location_x= [200,350]
 enemies = []
 for i in range(2):
     enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto')]) #gera a localização do inimgo
-esqueleto1 = [0, e.entity(200, 200, 45, 50, 'esqueleto')]
     # e coloca a física de colisão
+
+golems_map_location_x= [270]
+golems = []
+for i in range(1):
+    golems.append([0, e.entity(golems_map_location_x[i]-1, 200, 45, 50, 'golem')])
 
 background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0.5, [30, 40, 40, 400]],
                       [0.5, [130, 90, 100, 400]], [0.5, [300, 80, 120, 400]]]
@@ -207,6 +211,39 @@ while True:  # game loop
                 enemy_movement[0] = 0
             #vertical_momentum = -4
         enemy[1].change_frame(1)
+
+    for golem in golems:
+        golem[0] +=0.2
+        if golem[0] > 3:
+            golem[0] = 3
+        enemy_movement = [0, golem[0]]
+        if player.x > golem[1].x + 50:
+            enemy_movement[0] = 1
+            golem[1].set_action('parado')
+            golem[1].set_flip(False)
+        if player.x < golem[1].x - 50:
+            enemy_movement[0] = -1
+            golem[1].set_action('parado')
+            golem[1].set_flip(True)
+        if enemy_movement[0] == 0:
+            golem[1].set_action('parado')
+        collision_types = golem[1].move(enemy_movement, tile_rects)
+        if collision_types['bottom'] == True:
+            golem[0] = 0
+        golem[1].display(display, scroll)
+        if player.obj.rect.colliderect(golem[1].obj.rect):
+            if player.x < golem[1].x:
+                threading.Thread(target=hit_by_right_side).start()
+                if right_click == True:
+                    golems.remove(golem)
+                    enemy_movement[0] = 0
+            if player.x > golem[1].x:
+                threading.Thread(target=hit_by_left_side).start()
+                if right_click == True:
+                    golems.remove(golem)
+                enemy_movement[0] = 0
+            #vertical_momentum = -4
+        golem[1].change_frame(1)
 
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
