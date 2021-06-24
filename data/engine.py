@@ -117,13 +117,14 @@ def blit_center(surf, surf2, pos):
 class entity(object):
     global animation_database, animation_higher_database
 
-    def __init__(self, x, y, size_x, size_y, e_type):  # x, y, size_x, size_y, type
+    def __init__(self, x, y, size_x, size_y, e_type, life=1):  # x, y, size_x, size_y, type
         self.x = x
         self.y = y
         self.size_x = size_x
         self.size_y = size_y
         self.obj = physics_obj(x, y, size_x, size_y)
         self.animation = None
+        self.life = life
         self.image = None
         self.animation_frame = 0
         self.animation_tags = []

@@ -53,18 +53,19 @@ pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(-1)
 music = True
 
-player = e.entity(100, 100, 39, 45, 'player')
+vida_player = 5
+player = e.entity(100, 100, 39, 45, 'player', life=vida_player)
 
 enemies_map_location_x= [200,350]
 enemies = []
 for i in range(2):
-    enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto')]) #gera a localização do inimgo
+    enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto', life=1)]) #gera a localização do inimgo
     # e coloca a física de colisão
 
 golems_map_location_x= [270]
 golems = []
 for i in range(1):
-    golems.append([0, e.entity(golems_map_location_x[i]-1, 200, 45, 50, 'golem')])
+    golems.append([0, e.entity(golems_map_location_x[i]-1, 200, 45, 50, 'golem', life=20)])
 
 background_objects = [[0.25, [120, 10, 70, 400]], [0.25, [280, 30, 40, 400]], [0.5, [30, 40, 40, 400]],
                       [0.5, [130, 90, 100, 400]], [0.5, [300, 80, 120, 400]]]
@@ -202,11 +203,16 @@ while True:  # game loop
             if player.x < enemy[1].x:
                 threading.Thread(target=hit_by_right_side).start()
                 if right_click == True:
-                    enemies.remove(enemy)
+                    enemy[1].life -= 1
+                    if enemy[1].life <= 0:
+                        enemies.remove(enemy)
                     enemy_movement[0] = 0
             if player.x > enemy[1].x:
                 threading.Thread(target=hit_by_left_side).start()
                 if right_click == True:
+                    enemy[1].life -= 1
+                    if enemy[1].life <= 0:
+                        enemies.remove(enemy)
                     enemies.remove(enemy)
                 enemy_movement[0] = 0
             #vertical_momentum = -4
@@ -235,12 +241,16 @@ while True:  # game loop
             if player.x < golem[1].x:
                 threading.Thread(target=hit_by_right_side).start()
                 if right_click == True:
-                    golems.remove(golem)
+                    golem[1].life -= 1
+                    if golem[1].life <= 0:
+                        golems.remove(golem)
                     enemy_movement[0] = 0
             if player.x > golem[1].x:
                 threading.Thread(target=hit_by_left_side).start()
                 if right_click == True:
-                    golems.remove(golem)
+                    golem[1].life -= 1
+                    if golem[1].life <= 0:
+                        golems.remove(golem)
                 enemy_movement[0] = 0
             #vertical_momentum = -4
         golem[1].change_frame(1)
