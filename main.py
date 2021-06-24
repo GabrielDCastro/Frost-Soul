@@ -62,7 +62,7 @@ for i in range(2):
     enemies.append([0, e.entity(enemies_map_location_x[i]-1, 200, 45, 50, 'esqueleto', life=1)]) #gera a localização do inimgo
     # e coloca a física de colisão
 
-golems_map_location_x= [1050]
+golems_map_location_x= [1090]
 golems = []
 for i in range(1):
     golems.append([0, e.entity(golems_map_location_x[i]-1, 200, 45, 50, 'golem', life=20)])
